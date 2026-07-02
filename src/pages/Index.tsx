@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import Icon from '@/components/ui/icon';
+import GamePlayer, { PLAYABLE } from '@/components/GamePlayer';
 
 type Game = {
   id: string;
@@ -58,6 +59,7 @@ const STATS = [
 const Index = () => {
   const [category, setCategory] = useState('All');
   const [search, setSearch] = useState('');
+  const [active, setActive] = useState<Game | null>(null);
 
   const filtered = useMemo(() => {
     return GAMES.filter((g) => {
@@ -181,14 +183,23 @@ const Index = () => {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filtered.map((g) => (
+          {filtered.map((g) => {
+            const playable = PLAYABLE.includes(g.id);
+            return (
             <div
               key={g.id}
-              className="group relative rounded-xl border border-border bg-card/60 backdrop-blur p-5 flex flex-col hover:border-primary/60 hover:-translate-y-1 transition-all duration-300"
+              className={`group relative rounded-xl border bg-card/60 backdrop-blur p-5 flex flex-col hover:-translate-y-1 transition-all duration-300 ${
+                playable ? 'border-secondary/50 hover:border-secondary' : 'border-border hover:border-primary/40'
+              }`}
             >
+              {playable && (
+                <span className="absolute top-3 right-3 text-[9px] font-bold uppercase tracking-wider text-secondary bg-secondary/10 border border-secondary/40 rounded px-1.5 py-0.5">
+                  Playable
+                </span>
+              )}
               <div className="flex items-start justify-between mb-4">
                 <span className="text-5xl group-hover:scale-110 transition-transform">{g.emoji}</span>
-                <span className="text-[10px] font-mono text-muted-foreground border border-border rounded px-1.5 py-0.5">{g.year}</span>
+                {!playable && <span className="text-[10px] font-mono text-muted-foreground border border-border rounded px-1.5 py-0.5">{g.year}</span>}
               </div>
               <h3 className="font-bold text-base mb-1">{g.title}</h3>
               <span className="text-[11px] uppercase tracking-wide text-secondary mb-2">{g.category}</span>
@@ -197,12 +208,20 @@ const Index = () => {
                 <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                   <Icon name="Play" size={11} /> {g.plays.toLocaleString('en-US')}
                 </span>
-                <button className="flex items-center gap-1 rounded-md bg-primary/90 px-3 py-1.5 text-xs font-semibold text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Icon name="Play" size={12} /> Play
-                </button>
+                {playable ? (
+                  <button
+                    onClick={() => setActive(g)}
+                    className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground box-glow-pink hover:scale-105 transition-transform"
+                  >
+                    <Icon name="Play" size={12} /> Play
+                  </button>
+                ) : (
+                  <span className="text-[11px] text-muted-foreground/70 border border-border rounded px-2 py-1">Coming soon</span>
+                )}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {filtered.length === 0 && (
@@ -244,6 +263,8 @@ const Index = () => {
           <p className="font-display text-[10px] text-muted-foreground">Created by Nyvex</p>
         </div>
       </footer>
+
+      {active && <GamePlayer gameId={active.id} title={active.title} onClose={() => setActive(null)} />}
     </div>
   );
 };
