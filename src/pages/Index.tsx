@@ -264,7 +264,7 @@ const Index = () => {
         </div>
       </footer>
 
-      {active && <GamePlayer gameId={active.id} title={active.title} onClose={() => setActive(null)} />}
+      {active && <GamePlayer gameId={active.id} title={active.title} emoji={active.emoji} onClose={() => setActive(null)} />}
     </div>
   );
 };
